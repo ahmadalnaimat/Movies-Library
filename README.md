@@ -1,4 +1,4 @@
-# Movies-Library (V 2.0)
+# Movies-Library (V 3.0)
 
 **Auther name: ahmad alfazaat**
 ## WRRC
@@ -16,7 +16,5 @@ To build and run this app on your machine, follow these steps:
 5. Open your web browser and go to `http://localhost:8080`.
 
 ## changelog 
-1. added trending page
-3. added search page
-4. added toprated page
-5. added nowplaying page
+1. added database integration
+3. added getmovies page
