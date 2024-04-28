@@ -1,10 +1,15 @@
 const express = require("express");
 const axios = require('axios');
 const moviesdata= require('./Movie Data/data.json');
+const pg = require('pg');
+const cors = require('cors');
 require('dotenv').config();
 const ApiKey=process.env.Key;
+const client = new pg.Client('postgresql://localhost:5432/labs')
 const port = 8080;
 const app = express();
+app.use(cors());
+app.use(express.json());
 
 app.get('/',Homehandler)
 app.get('/favorite',Favoritehandler)
@@ -12,9 +17,32 @@ app.get('/trending',trendinghandler)
 app.get('/search',searchhandler)
 app.get('/toprated',topRated)
 app.get('/nowplaying',nowplaying)
+app.get('/getmovies',getmoviehandler)
+app.post('/getmovies',addmoviehandler)
+
 
 app.use(serverErrorHandler)
 app.use(pageErrorHandler)
+
+function getmoviehandler(req,res) {
+    const sql = 'SELECT * from movies;'
+    client.query(sql)
+    .then(data=> {
+        res.send(data.rows)
+    })
+    .catch(serverErrorHandler)
+}
+
+function addmoviehandler(req,res) {
+    const addmovies=req.body;
+    // const sql = 'INSERT INTO movies(id,title,release_date,poster_path,overview) VALUES (693134, Dune: Part Two, 2024-02-27, /1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg, Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge against the conspirators who destroyed his family Facing a choice between the love of his life and the fate of the known universe Paul endeavors to prevent a terrible future only he can foresee) RETURNING *;'
+    const sql = 'INSERT INTO movies(title,release_date,poster_path,overview) VALUES ($1, $2, $3, $4) RETURNING *;'
+    const values = [addmovies.title , addmovies.release_date , addmovies.poster_path , addmovies.overview]
+    client.query(sql,values)
+    .then(data=>{
+        res.send("you data was added")
+    })
+    .catch(serverErrorHandler)}
 
 function Homehandler(req,res) {
     let newMovies = new Movies(moviesdata.title,moviesdata.poster_path,moviesdata.overview)
@@ -116,6 +144,10 @@ function pageErrorHandler(err,req,res,next) {
     })
 }
 
-app.listen(port,()=>{
-    console.log("server is running")
+client.connect()
+.then(()=>{
+    app.listen(port,()=>{
+    console.log(`server is running ${port}`)
 })
+})
+
