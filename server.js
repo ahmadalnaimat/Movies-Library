@@ -17,14 +17,50 @@ app.get('/trending',trendinghandler)
 app.get('/search',searchhandler)
 app.get('/toprated',topRated)
 app.get('/nowplaying',nowplaying)
-app.get('/getmovies',getmoviehandler)
-app.post('/getmovies',addmoviehandler)
-
+app.get('/getmovies',getAllMoviehandler)
+app.get('/getmovies/:id',getMoviehandler)
+app.post('/getmovies',addMoviehandler)
+app.put('/UPDATE/:id',updateMoviehandler)
+app.delete('/DELETE/:id',deleteMoviehandler)
 
 app.use(serverErrorHandler)
 app.use(pageErrorHandler)
 
-function getmoviehandler(req,res) {
+function updateMoviehandler(req,res) {
+    const {id} = req.params;
+    const sql = `UPDATE movies
+    SET comment = $1
+    WHERE id = ${id};`
+    const {comment} = req.body;
+    const value = [comment];
+    client.query(sql,value)
+    .then(()=>{
+        res.send("comment updated")
+    })
+    .catch(serverErrorHandler)
+}
+
+function deleteMoviehandler(req,res) {
+    const {id} = req.params
+    const sql = `DELETE FROM movies WHERE id=${id};`
+    client.query(sql)
+    .then(()=>{
+        res.send("movie deleted successfully")
+    })
+    .catch(serverErrorHandler)
+}
+
+function getMoviehandler(req,res) {
+    const {id} = req.params
+    const sql = `SELECT * from movies WHERE id= ${id};`
+    client.query(sql)
+    .then(data=> {
+        res.send(data.rows)
+    })
+    .catch(serverErrorHandler)
+}
+
+function getAllMoviehandler(req,res) {
     const sql = 'SELECT * from movies;'
     client.query(sql)
     .then(data=> {
@@ -33,11 +69,10 @@ function getmoviehandler(req,res) {
     .catch(serverErrorHandler)
 }
 
-function addmoviehandler(req,res) {
+function addMoviehandler(req,res) {
     const addmovies=req.body;
-    // const sql = 'INSERT INTO movies(id,title,release_date,poster_path,overview) VALUES (693134, Dune: Part Two, 2024-02-27, /1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg, Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge against the conspirators who destroyed his family Facing a choice between the love of his life and the fate of the known universe Paul endeavors to prevent a terrible future only he can foresee) RETURNING *;'
-    const sql = 'INSERT INTO movies(title,release_date,poster_path,overview) VALUES ($1, $2, $3, $4) RETURNING *;'
-    const values = [addmovies.title , addmovies.release_date , addmovies.poster_path , addmovies.overview]
+    const sql = 'INSERT INTO movies(title,release_date,poster_path,comment) VALUES ($1, $2, $3, $4) RETURNING *;'
+    const values = [addmovies.title , addmovies.release_date , addmovies.poster_path , addmovies.comment]
     client.query(sql,values)
     .then(data=>{
         res.send("you data was added")
