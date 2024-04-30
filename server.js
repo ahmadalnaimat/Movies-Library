@@ -28,9 +28,7 @@ app.use(pageErrorHandler)
 
 function updateMoviehandler(req,res) {
     const {id} = req.params;
-    const sql = `UPDATE movies
-    SET comment = $1
-    WHERE id = ${id};`
+    const sql = `UPDATE movies SET comment = $1 WHERE id = ${id};`
     const {comment} = req.body;
     const value = [comment];
     client.query(sql,value)
@@ -104,9 +102,7 @@ function trendinghandler(req,res){
     .catch(serverErrorHandler)
 }
 function searchhandler(req,res) {
-    //let should be const
-    let query = req.query.query;
-    query = "the"
+    const query = req.query.query;
     axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${ApiKey}&language=en-US&query=${query}&page=2`)
     .then(Sresult=>{
         res.json(Sresult.data.results)
