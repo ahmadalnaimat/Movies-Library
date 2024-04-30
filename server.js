@@ -41,9 +41,7 @@ function trendinghandler(req,res){
     .catch(serverErrorHandler)
 }
 function searchhandler(req,res) {
-    //let should be const
-    let query = req.query.query;
-    query = "the"
+    const query = req.query.query;
     axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${ApiKey}&language=en-US&query=${query}&page=2`)
     .then(Sresult=>{
         res.json(Sresult.data.results)
